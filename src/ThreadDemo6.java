@@ -1,6 +1,4 @@
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 
 //线程池的好处：
@@ -8,7 +6,10 @@ import java.util.concurrent.Executors;
 //（2）池子事先定义好，避免无节制创建线程，导致系统出现不可预测风险。
 
 //创建方式new ThreadPoolExecutor（参数）
-//核心参数：corePoolSize、maximumPoolSize、keepAliveTime、unit、workQueue、threadFactory、handler
+//核心参数：corePoolSize、maximumPoolSize、keepAliveTime、unit、
+// workQueue(Array有限队列,List无限队列max失效,Synchronous无缓存队列达到max拒绝,Priority根据比较器优先队列)、
+// threadFactory、
+// handler：CallerRunsPolicy直接运行被拒绝的run方法，AbortPolicy丢弃并抛RejectedExecutionException异常，DiscardPolicy丢弃最新的任务，DiscardOldestPolicy丢最老的任务
 
 //创建
 //工具类 : Executors
@@ -24,12 +25,16 @@ public class ThreadDemo6 {
 
         MyCallable2 myCallable2 = new MyCallable2();
 
+        ArrayBlockingQueue arrayBlockingQueue = new ArrayBlockingQueue<>(10);
+        ThreadPoolExecutor.DiscardPolicy discardPolicy = new ThreadPoolExecutor.DiscardPolicy();
         //创建线程池对象
-        ExecutorService pool = Executors.newSingleThreadExecutor();
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(4, 10, 1000, TimeUnit.MICROSECONDS
+                , arrayBlockingQueue, discardPolicy);
 
         //提交任务
-        pool.submit(myCallable2);
-
+        for (int i = 0; i <20 ; i++) {
+            pool.submit(myCallable2);
+        }
         //关闭线程池
         pool.shutdown();
 
@@ -39,7 +44,7 @@ public class ThreadDemo6 {
 
 class MyCallable2 implements Callable {
 
-    private int i = 20;
+    private int i = 200;
 
     @Override
     public Object call() throws Exception {
@@ -50,8 +55,9 @@ class MyCallable2 implements Callable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println(Thread.currentThread().getName() + ":" + i--);
-
+            synchronized (this) {
+                System.out.println(Thread.currentThread().getName() + ":" + i--);
+            }
         }
         return null;
     }
