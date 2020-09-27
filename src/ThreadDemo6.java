@@ -35,8 +35,13 @@ public class ThreadDemo6 {
         for (int i = 0; i <20 ; i++) {
             pool.submit(myCallable2);
         }
-        //关闭线程池
         pool.shutdown();
+        while(true){
+            if(pool.isTerminated()){
+                System.out.println("end");
+                break;
+            }
+        }
 
     }
 

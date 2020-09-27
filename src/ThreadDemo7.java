@@ -21,10 +21,12 @@ public class ThreadDemo7 {
         MyCallable3 myCallable3 = new MyCallable3();
 
         //创建线程池对象
-        ExecutorService pool1 = Executors.newFixedThreadPool(5);
+//        ExecutorService pool1 = Executors.newFixedThreadPool(5);
+
+        ThreadPoolExecutor pool1 = new ThreadPoolExecutor(100, 200, 1000, TimeUnit.MICROSECONDS, new LinkedBlockingQueue<>());
 
         //提交任务
-        for (int i = 0; i <20 ; i++) {
+        for (int i = 0; i < 200; i++) {
             pool1.submit(myCallable3);
         }
         //关闭线程池
